@@ -4,7 +4,7 @@ const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.createCourse = async (req, res) => {
   try {
-    const { courseName, price, tag, category,courseDescription, whatYoutWillLearn } =
+    const { courseName, price, tag, category,courseDescription, whatYoutWillLearn,instructions,status} =
       req.body;
 
     const thumbnail = req.files.thunbnailImage;
@@ -24,10 +24,13 @@ exports.createCourse = async (req, res) => {
         message: "All fields are required",
       });
     }
+    if (!status || status === undefined) {
+			status = "Draft";
+		}
 
     //check for instructor
     const userId = req.user.id;
-    const instructorDetails = await User.findById(userId);
+    const instructorDetails = await User.findById(userId,{accountType: "Instructor"});
     console.log("Instructor Details: ", instructorDetails);
     //TODO: Verify that userId and instructorDetails._id  are same or different ?
 
@@ -59,6 +62,8 @@ exports.createCourse = async (req, res) => {
       price,
       category: categoryDetails._id,
       thumbnail: thumbnailImage.secure_url,
+      status: status,
+			instructions: instructions,
     });
 
     await User.findByIdAndUpdate(
@@ -70,6 +75,16 @@ exports.createCourse = async (req, res) => {
       },
       { new: true }
     );
+    await Category.findByIdAndUpdate(
+			{ _id: category },
+			{
+				$push: {
+					course: newCourse._id,
+				},
+			},
+			{ new: true }
+		);
+    
 
     return res.status(200).json({
       success: true,
@@ -91,7 +106,14 @@ exports.createCourse = async (req, res) => {
 exports.showAllCourses = async (req, res) => {
   try {
     //TODO: change the below statement incrementally
-    const allCourses = await Course.find({});
+    const allCourses = await Course.find({},{
+      courseName: true,
+      price: true,
+      thumbnail: true,
+      instructor: true,
+      ratingAndReviews: true,
+      studentsEnroled: true,
+    }).populate("instructor").exec();
 
     return res.status(200).json({
       success: true,

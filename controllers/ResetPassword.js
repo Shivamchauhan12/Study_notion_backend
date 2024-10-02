@@ -15,12 +15,12 @@ exports.resetPasswordToken = async (req, res) => {
       });
     }
 
-    const token = crypto.randomUUID();
+    const token = crypto.randomBytes(20).toString("hex");
     const updatedDetails = await User.findOneAndUpdate(
       { email },
       {
         token: token,
-        resetPasswordExpires: Date.now() + 5 * 60 * 1000,
+        resetPasswordExpires: Date.now() + 3600000,
       },
       { new: true }
     );
