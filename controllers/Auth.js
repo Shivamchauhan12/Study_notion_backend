@@ -232,7 +232,7 @@ exports.login = async (req, res) => {
 
 //changePassword
 
-exports.changePasswprd = async (req, res) => {
+exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
 

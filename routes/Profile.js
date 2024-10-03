@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { auth } = require("../middleware/auth")
+const { auth } = require("../middlewares/auth")
 const {
   deleteAccount,
   updateProfile,
@@ -17,7 +17,7 @@ router.delete("/deleteProfile", deleteAccount)
 router.put("/updateProfile", auth, updateProfile)
 router.get("/getUserDetails", auth, getAllUserDetails)
 // Get Enrolled Courses
-router.get("/getEnrolledCourses", auth, getEnrolledCourses)
-router.put("/updateDisplayPicture", auth, updateDisplayPicture)
+// router.get("/getEnrolledCourses",auth, getEnrolledCourses)
+// router.put("/updateDisplayPicture", auth, updateDisplayPicture)
 
 module.exports = router
