@@ -6,7 +6,7 @@ const User = require("../models/User");
 
 //auth
 
-exports.auth=async()=>{
+exports.auth=async(req,res,next)=>{
     try {
                 //extract token
                 const token = req.cookies.token 
@@ -86,6 +86,7 @@ exports.isInstructor = async (req, res, next) => {
 //isAdmin
 exports.isAdmin = async (req, res, next) => {
     try{
+        console.log(req.user.accountType,"from is admin")
            if(req.user.accountType !== "Admin") {
                return res.status(401).json({
                    success:false,

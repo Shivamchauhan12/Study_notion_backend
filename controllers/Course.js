@@ -1,23 +1,26 @@
 const Course = require("../models/Course");
 const Category = require("../models/Category");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
+const User=require("../models/User")
 
 exports.createCourse = async (req, res) => {
   try {
-    const { courseName, price, tag, category,courseDescription, whatYoutWillLearn,instructions,status} =
+    let { courseName, price, tag, category,courseDescription, whatYouWillLearn,instructions,status} =
       req.body;
 
-    const thumbnail = req.files.thunbnailImage;
+      console.log(req.files)
 
+      const thumbnail = req.files.thumbnailImage;
+console.log('====',thumbnail)
     //validation
     if (
       !courseName ||
       !courseDescription ||
-      !whatYoutWillLearn ||
+      !whatYouWillLearn ||
       !price ||
       !tag ||
       !thumbnail
-      ||category
+      ||!category
     ) {
       return res.status(400).json({
         success: false,
@@ -41,7 +44,9 @@ exports.createCourse = async (req, res) => {
       });
     }
 
-    const categoryDetails = await Category.findById(Category);
+  
+
+    const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
       return res.status(404).json({
         success: false,
@@ -58,7 +63,7 @@ exports.createCourse = async (req, res) => {
       courseName,
       courseDescription,
       instructor: instructorDetails._id,
-      whatYouWillLearn: whatYoutWillLearn,
+      whatYouWillLearn: whatYouWillLearn,
       price,
       category: categoryDetails._id,
       thumbnail: thumbnailImage.secure_url,
@@ -129,3 +134,53 @@ exports.showAllCourses = async (req, res) => {
     });
   }
 };
+
+//getCourseDetails
+exports.getCourseDetails = async (req, res) => {
+    try {
+            //get id
+            const {courseId} = req.body;
+            //find course details
+            const courseDetails = await Course.find(
+                                        {_id:courseId})
+                                        .populate(
+                                            {
+                                                path:"instructor",
+                                                populate:{
+                                                    path:"additionalDetails",
+                                                },
+                                            }
+                                        )
+                                        .populate("category")
+                                        //.populate("ratingAndreviews")
+                                        .populate({
+                                            path:"courseContent",
+                                            populate:{
+                                                path:"subSection",
+                                            },
+                                        })
+                                        .exec();
+
+                //validation
+                if(!courseDetails) {
+                    return res.status(400).json({
+                        success:false,
+                        message:`Could not find the course with ${courseId}`,
+                    });
+                }
+                //return response
+                return res.status(200).json({
+                    success:true,
+                    message:"Course Details fetched successfully",
+                    data:courseDetails,
+                })
+
+    }
+    catch(error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:error.message,
+        });
+    }
+}

@@ -28,6 +28,13 @@ app.use(
     })
 )
 
+app.use(
+	fileUpload({
+		useTempFiles:true,
+		tempFileDir:"/tmp",
+	})
+)
+
 cloudinaryConnect();
 
 app.use("/api/v1/auth",userRoutes)
